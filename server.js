@@ -4,6 +4,7 @@ const { sequelize, asegurarTenantPorDefecto } = require('./models');
 const authController = require('./controllers/authController');
 const authRoutes = require('./routes/authRoutes');
 const medicamentoRoutes = require('./routes/medicamentoRoutes');
+const laboratorioRoutes = require('./routes/laboratorioRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json({ limit: '100kb' }));
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/medicamentos', medicamentoRoutes);
+app.use('/api/laboratorios', laboratorioRoutes);
 
 // 404 para rutas desconocidas
 app.use((req, res) => {
