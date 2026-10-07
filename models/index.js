@@ -2,6 +2,7 @@ const sequelize = require('../config/db');
 const Laboratorio = require('./Laboratorio');
 const Medicamento = require('./Medicamento');
 const Tenant = require('./Tenant');
+const Usuario = require('./Usuario');
 
 // Relación: Un Laboratorio tiene muchos Medicamentos
 Laboratorio.hasMany(Medicamento, {
@@ -28,6 +29,18 @@ Medicamento.belongsTo(Tenant, {
   targetKey: 'CodTenant'
 });
 
+// Relación: Un Tenant tiene muchos Usuarios
+Tenant.hasMany(Usuario, {
+  foreignKey: 'CodTenant',
+  sourceKey: 'CodTenant',
+  onDelete: 'CASCADE'
+});
+
+Usuario.belongsTo(Tenant, {
+  foreignKey: 'CodTenant',
+  targetKey: 'CodTenant'
+});
+
 // Garantiza el tenant por defecto (para cuentas sin tenant propio).
 async function asegurarTenantPorDefecto() {
   const [tenant] = await Tenant.findOrCreate({
@@ -42,5 +55,6 @@ module.exports = {
   Laboratorio,
   Medicamento,
   Tenant,
+  Usuario,
   asegurarTenantPorDefecto
 };

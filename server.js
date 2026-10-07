@@ -1,13 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const { sequelize, asegurarTenantPorDefecto } = require('./models');
+const authController = require('./controllers/authController');
 const authRoutes = require('./routes/authRoutes');
 const medicamentoRoutes = require('./routes/medicamentoRoutes');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+
+// CORS: permite varios orígenes separados por coma. Por defecto, cualquiera.
+const origenesPermitidos = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : '*';
+app.use(cors({ origin: origenesPermitidos }));
+
+app.use(express.json({ limit: '100kb' }));
 
 // Rutas
 app.use('/api/auth', authRoutes);
@@ -23,14 +30,19 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Cuerpo JSON inválido' });
   }
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'El cuerpo de la petición es demasiado grande' });
+  }
   console.error('Error no controlado:', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// Sincroniza la BD y garantiza el tenant por defecto
+// Sincroniza la BD y garantiza el tenant y el admin por defecto.
+// DB_SYNC_ALTER=true aplica cambios de esquema sin borrar datos (solo desarrollo).
 const crearApp = async () => {
-  await sequelize.sync();
+  await sequelize.sync(process.env.DB_SYNC_ALTER === 'true' ? { alter: true } : {});
   await asegurarTenantPorDefecto();
+  await authController.asegurarAdminPorDefecto();
   return app;
 };
 
