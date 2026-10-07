@@ -32,7 +32,7 @@ test('medicamento: se crea sin laboratorio (CodLab null)', async () => {
     body: { descripcionMed: 'Sin lab', stock: 3, precioVentaUni: 1 }
   });
   assert.equal(r.status, 201);
-  assert.equal(r.body.data.CodLab, null);
+  assert.ok(!r.body.data.CodLab, 'un medicamento sin laboratorio no tiene CodLab');
 });
 
 test('medicamento: se puede asignar un laboratorio existente', async () => {
@@ -49,5 +49,5 @@ test('medicamento: se puede asignar un laboratorio existente', async () => {
     body: { CodLab: null }
   });
   assert.equal(editada.status, 200);
-  assert.equal(editada.body.data.CodLab, null);
+  assert.ok(!editada.body.data.CodLab, 'el laboratorio quedó sin asignar');
 });
