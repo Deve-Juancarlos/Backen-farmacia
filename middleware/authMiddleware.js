@@ -16,3 +16,11 @@ exports.verificarToken = (req, res, next) => {
     res.status(403).json({ error: 'Token inválido o expirado' });
   }
 };
+
+// Protege rutas según rol. Uso: verificarRol('administrador', 'moderador')
+exports.verificarRol = (...rolesPermitidos) => (req, res, next) => {
+  if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
+    return res.status(403).json({ error: 'No tienes permisos para realizar esta operación' });
+  }
+  next();
+};

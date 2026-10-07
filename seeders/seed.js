@@ -1,9 +1,14 @@
-const { sequelize, Laboratorio, Medicamento } = require('../models');
+const { sequelize, Laboratorio, Medicamento, Tenant, asegurarTenantPorDefecto } = require('../models');
 
 const insertarDatos = async () => {
   try {
     await sequelize.sync({ force: true });
     console.log('Tablas creadas');
+
+    // Tenants (farmacias)
+    const tenant1 = await asegurarTenantPorDefecto();
+    const tenant2 = await Tenant.create({ nombre: 'Farmacia Sur', activo: true });
+    console.log('Tenants insertados');
 
     // Insertar Laboratorios
     const lab1 = await Laboratorio.create({
@@ -24,7 +29,7 @@ const insertarDatos = async () => {
 
     console.log('Laboratorios insertados');
 
-    // Insertar Medicamentos
+    // Insertar Medicamentos (todos pertenecen al tenant por defecto)
     await Medicamento.bulkCreate([
       {
         descripcionMed: 'Paracetamol 500mg',
@@ -35,7 +40,8 @@ const insertarDatos = async () => {
         precioVentaUni: 2.50,
         precioVentaPres: 45.00,
         Marca: 'Tylenol',
-        CodLab: lab1.CodLab
+        CodLab: lab1.CodLab,
+        CodTenant: tenant1.CodTenant
       },
       {
         descripcionMed: 'Ibuprofeno 400mg',
@@ -46,7 +52,8 @@ const insertarDatos = async () => {
         precioVentaUni: 3.00,
         precioVentaPres: 80.00,
         Marca: 'Advil',
-        CodLab: lab2.CodLab
+        CodLab: lab2.CodLab,
+        CodTenant: tenant1.CodTenant
       },
       {
         descripcionMed: 'Amoxicilina 500mg',
@@ -57,7 +64,20 @@ const insertarDatos = async () => {
         precioVentaUni: 5.50,
         precioVentaPres: 110.00,
         Marca: 'Amoxil',
-        CodLab: lab1.CodLab
+        CodLab: lab1.CodLab,
+        CodTenant: tenant1.CodTenant
+      },
+      {
+        descripcionMed: 'Loratadina 10mg (otra farmacia)',
+        fechaFabricacion: '2026-02-01',
+        fechaVencimiento: '2028-02-01',
+        Presentacion: 'Caja x 10 tabletas',
+        stock: 40,
+        precioVentaUni: 1.50,
+        precioVentaPres: 25.00,
+        Marca: 'Clarin',
+        CodLab: lab2.CodLab,
+        CodTenant: tenant2.CodTenant
       }
     ]);
 
